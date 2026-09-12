@@ -1,505 +1,176 @@
 # 🐾 CodeMate AI
 
-> **Your Personal AI Learning Companion**
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+[![Gemini API](https://img.shields.io/badge/Powered_by-Google_Gemini-4285F4?logo=google)](https://ai.google.dev/)
+[![Vercel Ready](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://vercel.com/)
 
-SkillPet AI is a modern **AI-powered personal learning platform** designed to help learners build skills through personalized learning paths, interactive practice, doubt solving, quizzes, progress awareness, and intelligent recommendations.
+> **Your Gamified, Context-Aware AI Coding & Technology Learning Companion.**
 
-Instead of acting like a generic chatbot, SkillPet AI is designed to understand **what you are learning, where you are struggling, and what you should learn next**.
-
----
-
-## ✨ Why CodeMate AI?
-
-Learning something new can be difficult when you don't know:
-
-* What to learn first
-* What to learn next
-* Which topics you are weak at
-* How to practice
-* How to revise
-* Whether you are actually making progress
-
- CodeMate AI aims to solve this by combining a **personal learning environment with an AI mentor**.
-
-The goal is simple:
-
-> 🧠 **Learn → Practice → Track → Improve → Repeat**
+**CodeMate AI** combines an interactive gamified learning platform with an intelligent AI study mentor. Instead of struggling through dry documentation or disconnected chat interfaces, learners study through guided roadmaps, bite-sized chapters, interactive practice quizzes, evolvable AI companions, and real-time doubt solving in English, Hindi, and Hinglish.
 
 ---
 
-## 🚀 Key Features
+## 🌟 Key Features
 
-### 🤖 Personal AI Mentor
+### 🤖 Live AI Companion & Study Mentor
+- **Powered by Google Gemini**: Natural conversation, live Socratic explanations, and structured debugging.
+- **Multilingual & Hinglish Support**: Ask questions in English, Hindi, or conversational Hinglish (*"Bhai Python loops easy way me samjha de"*).
+- **Multiple Learning Modes**:
+  - 📖 **Learn**: Core conceptual walkthroughs and analogies.
+  - 🧩 **Practice**: Real coding exercises and algorithmic challenges.
+  - 📝 **Quiz**: Knowledge checkpoints with instant evaluation and hints.
+  - 💡 **Doubt**: Step-by-step problem breakdown.
+  - 🔄 **Revision**: Review previously flagged weak areas.
+  - 🚀 **Project**: Guidance on building real-world AI & software applications.
+  - 🎯 **Interview**: Technical mock interview questions.
+- **Smart Fallback Engine**: If an API key is missing or quotas are hit, built-in intelligent offline fallbacks ensure the learner is never stuck.
 
-Interact with CodeMate AI through a conversational interface and get personalized learning assistance.
+### 🎮 Gamified Learning Ecosystem
+- **Evolvable Companions (Sanctuary)**: Choose companions like *Byte*, *Nova*, *Sage*, and *Pyra* that gain XP, level up, and evolve as you complete lessons.
+- **Interactive Chapter Runner**: Theory blocks, multiple-choice questions, fill-in-the-blanks, code exercises, and instant feedback.
+- **Streaks & Currency**: Earn daily streak multipliers, collect gems, and unlock companion customizations.
+- **Dynamic Quests & Achievements**: Daily study challenges and milestones.
 
-The AI can help with:
-
-* Concept explanations
-* Doubt solving
-* Learning guidance
-* Practice questions
-* Revision
-* Project guidance
-* Interview preparation
-
----
-
-### 🗺️ Personalized Learning Roadmaps
-
-Create learning paths based on:
-
-* Current skill level
-* Learning goals
-* Interests
-* Existing knowledge
-* Progress
-
-For example:
-
-```text
-Python Basics
-      ↓
-Functions & Data Structures
-      ↓
-NumPy & Pandas
-      ↓
-Mathematics
-      ↓
-Machine Learning
-      ↓
-Deep Learning
-      ↓
-AI/ML Projects
-```
-
-The learning journey is designed to be adaptable instead of following the same path for every learner.
+### 🗺️ Curated Courses & Learning Roadmaps
+- **Python for AI & Data**: Syntax, data structures, and functional patterns.
+- **Machine Learning Foundations**: Supervised and unsupervised algorithms, math intuition.
+- **Deep Learning & Neural Nets**: CNNs, RNNs, and Transformers.
+- **Generative AI & LLMs**: Prompt engineering, RAG, and AI agent architectures.
+- **Computer Vision & NLP**: Image processing, embeddings, and tokenization.
+- **Data Structures & Algorithms**: Arrays, trees, graphs, and dynamic programming.
 
 ---
 
-### 🧠 Context-Aware Learning
+## 🛠️ Tech Stack
 
-CodeMate AI keeps track of relevant learning context during a conversation.
-
-For example:
-
-**User:**
-
-> I don't understand Python functions.
-
-Later:
-
-> What should I revise today?
-
-CodeMate AI can use the previous context and recommend functions as a revision topic.
+- **Frontend**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS v4](https://tailwindcss.com/)
+- **Animations & Icons**: [Motion](https://motion.dev/), [Lucide React](https://lucide.dev/)
+- **AI Model**: [Google Gen AI SDK (`@google/genai`)](https://www.npmjs.com/package/@google/genai) — Gemini 2.5 Flash / Gemini 3.8 Flash
+- **Backend & Server**:
+  - **Node.js + Express**: Full-stack bundled server (`server.ts`) for containers / Cloud Run / Railway / Docker.
+  - **Vercel Serverless Function**: Serverless chat endpoint (`/api/chat.ts`) for zero-config Vercel deployment.
+- **Bundler**: [Vite](https://vitejs.dev/) + [esbuild](https://esbuild.github.io/)
 
 ---
 
-### 📚 Multiple Learning Modes
-
-CodeMate AI is designed around different ways of learning:
-
-| Mode         | Purpose                          |
-| ------------ | -------------------------------- |
-| 📖 Learn     | Understand a new concept         |
-| 🧩 Practice  | Solve exercises                  |
-| 📝 Quiz      | Test your knowledge              |
-| 💡 Doubt     | Get help with a problem          |
-| 🔄 Revision  | Review previous topics           |
-| 🚀 Project   | Learn through practical projects |
-| 🎯 Interview | Prepare for technical interviews |
-
----
-
-### 📝 AI-Powered Quizzes
-
-Generate practice questions according to the learner's level.
-
-Features include:
-
-* Topic-based quizzes
-* Difficulty-based questions
-* Answer evaluation
-* Explanations
-* Hints
-* Performance awareness
-
-The objective is not just to provide the answer, but to help the learner understand **why** an answer is correct or incorrect.
-
----
-
-### 📊 Learning Progress
-
-CodeMate AI is designed to understand learning progress such as:
-
-* Completed topics
-* Pending topics
-* Weak areas
-* Strong areas
-* Quiz performance
-* Practice history
-* Current learning goals
-
-This information can be used to provide better recommendations.
-
----
-
-### 🎯 Intelligent Recommendations
-
-Based on the learner's goals and progress, CodeMate AI can recommend:
-
-* What to learn next
-* Topics to revise
-* Practice problems
-* Quizzes
-* Projects
-* Interview questions
-
-The goal is to answer one important question:
-
-> **"What should I learn next?"**
-
----
-
-### 💬 Natural Conversation
-
- CodeMate AI supports natural communication rather than requiring specific commands.
-
-For example:
-
-```text
-"Explain JavaScript promises."
-
-"Bro, mujhe Python loops samajh nahi aa rahe."
-
-"Give me some SQL practice questions."
-
-"What should I learn after React?"
-
-"Take a Python interview."
-
-"Help me revise today's topics."
-```
-
-The assistant should understand the learner's intent and respond accordingly.
-
----
-
-### 🌐 English, Hindi & Hinglish
-
-CodeMate AI is designed to support natural communication in:
-
-* English
-* Hindi
-* Hinglish
-
-Example:
-
-> **User:** Bhai JavaScript ka loop easy way mein samjha de.
-
-> **CodeMate AI:** Bilkul! Loop ka simple meaning hai ek hi kaam ko baar-baar repeat karna...
-
-The assistant can adapt its response style to the learner.
-
----
-
-## 🎨 Modern Chat Experience
-
-The platform includes a modern conversational interface with:
-
-* Real-time style messaging
-* Typing indicator
-* Smooth message animations
-* Auto-scroll
-* Suggested prompts
-* Quick actions
-* Message copy
-* Regenerate response
-* Retry handling
-* Conversation context
-* Responsive chat experience
-
-The chatbot is designed to feel like a **native part of the learning platform**.
-
----
-
-## 🧭 Platform Awareness
-
-CodeMate AI is designed to understand the platform's learning environment, including:
-
-* Courses
-* Lessons
-* Learning paths
-* Quizzes
-* Practice
-* Projects
-* Progress
-* Profile
-* Settings
-
-This allows the AI to guide learners instead of giving generic instructions.
-
----
-
-## 🧑‍🎓 Example Learning Journey
-
-A learner wants to become an AI/ML engineer.
-
-### Step 1 — Goal
-
-```text
-I want to become an AI/ML Engineer.
-```
-
-### Step 2 — Assessment
-
-CodeMate AI identifies the learner's current level.
-
-### Step 3 — Roadmap
-
-```text
-Programming
-     ↓
-Python
-     ↓
-Data Structures
-     ↓
-NumPy & Pandas
-     ↓
-Mathematics
-     ↓
-Machine Learning
-     ↓
-Deep Learning
-     ↓
-Projects
-     ↓
-Interview Preparation
-```
-
-### Step 4 — Practice
-
-The learner solves exercises and quizzes.
-
-### Step 5 — Feedback
-
-CodeMate AI identifies weak areas.
-
-### Step 6 — Adaptation
-
-The learning recommendations are adjusted according to progress.
-
----
-
-## 🛠️ Technology Stack
-
-> Update this section according to the technologies actually used in the project.
-
-### Frontend
-
-* React.js
-* JavaScript / TypeScript
-* HTML5
-* CSS3
-* `[Tailwind CSS / Other]`
-
-### AI
-
-* `[AI Model / AI Provider]`
-
-### Backend
-
-* `[Backend Technology — if implemented]`
-
-### Database
-
-* `[Database — if implemented]`
-
-### Authentication
-
-* `[Authentication Provider — if implemented]`
-
-### Deployment
-
-* `[Vercel / Netlify / Other]`
-
----
-
-## 📁 Project Structure
-
-Example structure:
+## 📁 Project Architecture
 
 ```text
 CodeMate-AI/
-│
-├── public/
-│   ├── images/
-│   └── icons/
-│
+├── api/
+│   └── chat.ts                     # Vercel Serverless API handler (Gemini + fallback)
+├── public/                         # Public assets & companion artwork
 ├── src/
 │   ├── components/
-│   ├── pages/
-│   ├── layouts/
-│   ├── features/
-│   ├── hooks/
-│   ├── utils/
+│   │   ├── AuthScreen.tsx          # Login & onboarding screens
+│   │   ├── LandingPage.tsx         # Showcase & feature landing view
+│   │   └── Dashboard/
+│   │       ├── CodeMateAIChat.tsx   # Live conversational AI companion chat
+│   │       ├── ChapterRunner.tsx   # Interactive lesson runner with quiz engine
+│   │       ├── CourseCatalog.tsx   # Course exploration and enrollment
+│   │       ├── DashboardShell.tsx  # Main dashboard layout and sidebar
+│   │       ├── PetSanctuary.tsx    # Companion XP, evolutions, and customization
+│   │       ├── ProfileView.tsx     # User progress, stats, and achievements
+│   │       └── ProgressTracker.tsx # Topic breakdown, streak calendar, weak areas
+│   ├── context/
+│   │   └── AppContext.tsx          # Global reactive state (courses, user, companions)
 │   ├── data/
-│   └── styles/
-│
-├── README.md
-├── package.json
-└── .env.example
+│   │   ├── courses.ts              # Course curriculum and chapter content
+│   │   └── companions.ts           # Companion characters and evolution trees
+│   ├── types.ts                    # TypeScript interfaces & domain models
+│   ├── App.tsx                     # Top-level view router
+│   ├── main.tsx                    # React DOM root entry
+│   └── index.css                   # Global Tailwind CSS styles
+├── server.ts                       # Express + Vite production & dev server
+├── package.json                    # Dependencies & build scripts
+├── tsconfig.json                   # TypeScript configuration
+├── vite.config.ts                  # Vite build and Tailwind setup
+└── .env.example                    # Environment variable template
 ```
-
-The structure may vary depending on the final technology stack.
 
 ---
 
-## ⚙️ Installation
+## 🚀 Getting Started
 
-### 1. Clone the repository
-
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/CodeMate-ai.git
+git clone https://github.com/your-username/CodeMate-AI.git
+cd CodeMate-AI
 ```
 
-### 2. Navigate to the project
-
-```bash
-cd CodeMate-ai
-```
-
-### 3. Install dependencies
-
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-### 4. Start the development server
+### 3. Configure Environment Variables
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Add your Gemini API key (optional for local fallback, required for live AI responses):
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+> Get your API key for free from [Google AI Studio](https://aistudio.google.com/).
 
+### 4. Run Locally
 ```bash
 npm run dev
 ```
+Open your browser at **http://localhost:3000**.
 
-### 5. Open in browser
+---
 
-```text
-http://localhost:3000
+## 🚢 Deployment Guide
+
+### Deploying to Vercel (Recommended)
+
+1. Push your repository to **GitHub**.
+2. Go to [Vercel](https://vercel.com) and click **Add New Project** → Import your repository.
+3. Build Settings will be auto-detected:
+   - **Framework Preset**: Vite
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+4. Under **Environment Variables**, add:
+   - `GEMINI_API_KEY`: *Your Google Gemini API Key*
+5. Click **Deploy**. Both the Vite frontend and `/api/chat` serverless function will be active.
+
+### Deploying to Docker / Cloud Run / Railway / Render
+
+The project includes a production Node/Express server (`server.ts` compiled to `dist/server.cjs`):
+```bash
+# 1. Build client and server
+npm run build
+
+# 2. Start production server
+npm start
 ```
-
-> Use the port shown in your terminal if your development server uses a different port.
-
----
-
-## 🔐 Environment Variables
-
-If the project requires environment variables, create a `.env` file based on `.env.example`.
-
-Example:
-
-```env
-AI_API_KEY=
-DATABASE_URL=
-AUTH_SECRET=
-```
-
-**Never commit real API keys, passwords, tokens, or other secrets to GitHub.**
+Bind the container to port `3000` and supply the `GEMINI_API_KEY` environment variable.
 
 ---
 
-## 📱 Responsive Design
+## 🔑 Environment Variables
 
-CodeMate AI is designed to provide a consistent experience across:
-
-* 📱 Mobile
-* 📲 Tablet
-* 💻 Laptop
-* 🖥️ Desktop
-
-The interface adapts its layout, navigation, chat experience, cards, and learning content according to screen size.
-
----
-
-## 🎯 Project Goals
-
-CodeMate AI aims to make learning:
-
-* Personalized
-* Interactive
-* Consistent
-* Practical
-* Accessible
-* Goal-oriented
-
-Instead of simply consuming courses, learners should be able to **interact with their learning environment and receive continuous guidance from an AI mentor**.
-
----
-
-## 🔮 Future Scope
-
-The project can be extended with:
-
-* 🧠 Persistent AI memory
-* 👤 Personalized learner profiles
-* 📊 Advanced learning analytics
-* 🎤 Voice-based learning
-* 📄 PDF/document learning
-* 💻 AI code analysis
-* 🧪 Automatic coding evaluation
-* 🏆 Gamification
-* 🔥 Learning streaks
-* 🏅 Achievements and badges
-* 📚 Course recommendations
-* 🤖 AI-generated study plans
-* 🗣️ Mock interviews
-* 🔔 Smart learning reminders
-* 🌐 Real-time AI interactions
-* ☁️ Cloud-synchronized learning history
-
----
-
-## 💡 Vision
-
-CodeMate AI is built around the idea that **every learner should have a personal mentor**.
-
-A mentor that understands:
-
-> **What you know.**
-> **What you don't know.**
-> **What you're trying to achieve.**
-> **Where you're struggling.**
-> **And what you should learn next.**
-
-### 🐾 Learn smarter. Practice better. Grow faster.
-
-**Welcome to CodeMate AI.**
-
----
-
-## 📌 Project Status
-
-🚧 **Currently in Development**
-
-CodeMate AI is an evolving project, and new learning, AI, personalization, and progress-tracking capabilities will be added over time.
+| Variable | Description | Required? |
+| :--- | :--- | :--- |
+| `GEMINI_API_KEY` | Google Gemini API key for real-time model inference | Optional (has smart offline fallback) |
+| `PORT` | Server listening port (defaults to `3000`) | Optional |
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, suggestions, and feedback are welcome.
-
-If you have an idea that can improve CodeMate AI, feel free to:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Commit your changes
-5. Open a Pull Request
+Contributions and feedback are welcome!
+1. Fork the repo (`git checkout -b feature/amazing-feature`)
+2. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+3. Push to the branch (`git push origin feature/amazing-feature`)
+4. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-This project is currently intended for educational and portfolio purposes.
-
-Add an appropriate open-source license if you decide to distribute the project publicly.
+This project is open-source and available under the [MIT License](LICENSE).
