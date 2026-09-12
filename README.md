@@ -199,6 +199,5 @@ Contributions and feedback are welcome!
 This project is open-source and available under the [MIT License](LICENSE).
 
 ```
-
-Ab ye **tumhare original wale README ke format ke according hi hai**, aur starting ke **saare 5 badges + unke links** preserved hain. Sirf tumhara Vercel **Live Demo** link add hua hai.
+This project is open-source and available under the [MIT License](https://github.com/ankitkgupta11-g/CodeMate-AI/blob/main/LICENSE).
 ```
