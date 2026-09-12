@@ -1,0 +1,6 @@
+{
+  "name": "CodeMate AI",
+  "description": "Interactive AI companion and gamified educational learning platform for mastering tech, coding, and AI skills.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
