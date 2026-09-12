@@ -105,7 +105,7 @@ const QUICK_PROMPTS = [
   { label: '🔍 Review my weak areas', prompt: 'Check my recorded weak topics and give me a targeted revision plan with exercises.' },
 ];
 
-export const SkillPetAIChat: React.FC<SkillPetAIChatProps> = ({ onNavigateToCourse }) => {
+export const CodeMateAIChat: React.FC<SkillPetAIChatProps> = ({ onNavigateToCourse }) => {
   const {
     state,
     activeCompanion,
@@ -693,3 +693,5 @@ export const SkillPetAIChat: React.FC<SkillPetAIChatProps> = ({ onNavigateToCour
     </div>
   );
 };
+
+export const SkillPetAIChat = CodeMateAIChat;
