@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { User, Mail, Lock, ArrowRight, Loader2, CheckCircle2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 export const AuthScreen: React.FC = () => {
-  const { login, signup, navigateTo } = useApp();
+  const { loginWithGoogle, loginWithEmail, signupWithEmail, navigateTo } = useApp();
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -12,38 +12,41 @@ export const AuthScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage(null);
 
-    setTimeout(() => {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
       setIsLoading(false);
-      const cleanEmail = email.trim().toLowerCase();
-      
-      // Dedicated Owner / Admin login check
-      if (
-        (cleanEmail === 'admin@codemate.ai' || cleanEmail === 'owner@codemate.ai') &&
-        (password === 'CodeMateAdmin2026!' || password === 'admin123')
-      ) {
-        login(cleanEmail, 'CodeMate Owner');
-        return;
-      }
+      setMessage({ tone: 'error', text: 'Please enter both your email address and password.' });
+      return;
+    }
 
-      if (mode === 'sign-in') {
-        login(cleanEmail, name.trim() || cleanEmail.split('@')[0] || 'Learner');
-      } else {
-        signup(name.trim() || 'Learner', cleanEmail);
+    if (mode === 'sign-in') {
+      const res = await loginWithEmail(cleanEmail, password);
+      setIsLoading(false);
+      if (!res.success) {
+        setMessage({ tone: 'error', text: res.error || 'Failed to sign in. Please verify your credentials.' });
       }
-    }, 600);
+    } else {
+      const res = await signupWithEmail(name.trim() || 'Learner', cleanEmail, password);
+      setIsLoading(false);
+      if (!res.success) {
+        setMessage({ tone: 'error', text: res.error || 'Failed to create account.' });
+      }
+    }
   };
 
-  const handleGoogleAuth = () => {
+  const handleGoogleAuth = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      login('google.user@example.com', 'Google Explorer');
-    }, 600);
+    setMessage(null);
+    const res = await loginWithGoogle();
+    setIsLoading(false);
+    if (!res.success) {
+      setMessage({ tone: 'error', text: res.error || 'Google sign-in failed. Please try again.' });
+    }
   };
 
   return (

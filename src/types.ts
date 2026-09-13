@@ -128,9 +128,11 @@ export interface UserLearningProfile {
 export interface UserState {
   isLoggedIn: boolean;
   user: {
+    uid?: string;
     name: string;
     email: string;
     avatar?: string;
+    role?: 'owner' | 'admin' | 'student';
   } | null;
   pet: {
     companionName: string;

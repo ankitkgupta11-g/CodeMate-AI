@@ -1,0 +1,111 @@
+{
+  "entities": {
+    "userProfile": {
+      "title": "UserProfile",
+      "description": "User profile with personal identity and role information",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "User display name"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "User email address"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["owner", "admin", "student"],
+          "description": "Role in the application"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["userId", "email", "role"]
+    },
+    "userProgress": {
+      "title": "UserProgress",
+      "description": "User learning progress, pet stats, and gamification state",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID"
+        },
+        "streak": {
+          "type": "number",
+          "description": "Day streak count"
+        },
+        "gems": {
+          "type": "number",
+          "description": "Virtual reward gems"
+        },
+        "hearts": {
+          "type": "number",
+          "description": "Lives or hearts count"
+        },
+        "petCompanionName": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Companion character choice"
+        },
+        "petCustomName": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Custom name for companion"
+        },
+        "petLevel": {
+          "type": "number",
+          "description": "Current pet level"
+        },
+        "petXp": {
+          "type": "number",
+          "description": "Pet experience points"
+        },
+        "petIsEvolved": {
+          "type": "boolean",
+          "description": "Whether pet has evolved"
+        },
+        "completedChapters": {
+          "type": "string",
+          "description": "JSON array of completed chapter IDs"
+        },
+        "enrolledCourses": {
+          "type": "string",
+          "description": "JSON array of enrolled course slugs"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last progress update"
+        }
+      },
+      "required": ["userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/userProfile"
+      },
+      "description": "Private user profile document accessible only by the owner"
+    },
+    "/userProgress/{userId}": {
+      "schema": {
+        "$ref": "#/entities/userProgress"
+      },
+      "description": "User learning stats and pet progress document"
+    }
+  }
+}

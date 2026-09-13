@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { Request, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
 
 function buildSystemInstruction(context: any): string {
@@ -71,7 +71,7 @@ function generateFallbackResponse(userMessage: string, context: any): string {
   return `Hello ${userName}! I'm **${companion}**, your personal AI study partner and mentor at CodeMate 🌟\n\nI'm tracking your learning in **${context?.activeCourse || 'AI Foundations'}** with a **${context?.streak ?? 0}-day streak**!\n\nHere is how I can assist you right now:\n- 📚 **Explain Concepts**: Ask me to break down any coding or AI topic in simple terms or Hinglish.\n- 📝 **Interactive Quizzes**: Test your knowledge on recent chapters.\n- 💡 **Code Reviews & Debugging**: Paste error messages or snippets to debug together.\n- 🗺️ **Learning Roadmaps**: Get personalized step-by-step study plans tailored to your goals.\n\nWhat would you like to explore today?`;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: Request, res: Response) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

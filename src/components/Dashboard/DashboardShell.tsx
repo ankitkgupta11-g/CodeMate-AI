@@ -287,9 +287,16 @@ export const DashboardShell: React.FC = () => {
                 </button>
                 <div className="absolute right-0 top-full mt-2 w-64 p-3 rounded-2xl bg-white/95 border border-[#102312]/10 shadow-[0_20px_50px_rgba(16,35,18,0.15)] backdrop-blur-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none group-hover:pointer-events-auto space-y-1">
                   <div className="px-3 py-2 border-b border-[#102312]/10">
-                    <p className="text-xs font-bold text-[#102312] truncate">
-                      {state.user?.name || 'Learner'}
-                    </p>
+                    <div className="flex items-center justify-between gap-1.5">
+                      <p className="text-xs font-bold text-[#102312] truncate">
+                        {state.user?.name || 'Learner'}
+                      </p>
+                      {state.user?.role === 'owner' && (
+                        <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-[#102312] border border-emerald-300 font-mono">
+                          Owner
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[11px] text-[#5a705d] truncate">
                       {state.user?.email || 'user@codemate.ai'}
                     </p>

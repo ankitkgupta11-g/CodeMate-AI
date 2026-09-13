@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global catch-all deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Test connection document for initial health checks
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // User profiles - strict owner-only access
+    match /users/{userId} {
+      allow read, write: if isValidId(userId) && isOwner(userId);
+    }
+
+    // User learning & pet progress - strict owner-only access
+    match /userProgress/{userId} {
+      allow read, write: if isValidId(userId) && isOwner(userId);
+    }
+  }
+}

@@ -38,6 +38,13 @@
 * **Streaks & Currency**: Earn daily streak multipliers, collect gems, and unlock companion customizations.
 * **Dynamic Quests & Achievements**: Daily study challenges and milestones.
 
+### 🛡️ Authentication & Cloud Persistence
+
+* **Dual Authentication**: Google 1-Click Sign-In (OAuth popup) and secure Email/Password Sign-In / Sign-Up.
+* **Role-Based Access Control (RBAC)**: Distinct permissions for **Owner / Admin** and **Student / Learner** roles.
+* **Cloud Sync with Firestore**: Automatically syncs user streaks, gems, chapter completion states, notes, and sanctuary pet levels across devices.
+* **Zero-Trust Security**: Server-enforced `firestore.rules` ensure users can only read and write their own authorized records.
+
 ### 🗺️ Curated Courses & Learning Roadmaps
 
 * **Python for AI & Data**: Syntax, data structures, and functional patterns.
@@ -54,6 +61,10 @@
 * **Frontend**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS v4](https://tailwindcss.com/)
 * **Animations & Icons**: [Motion](https://motion.dev/), [Lucide React](https://lucide.dev/)
 * **AI Model**: [Google Gen AI SDK (`@google/genai`)](https://www.npmjs.com/package/@google/genai) — Gemini 2.5 Flash / Gemini 3.8 Flash
+* **Authentication & Database**:
+  * [Firebase Authentication](https://firebase.google.com/docs/auth) (Google 1-Click Popup + Email/Password sign-in)
+  * [Cloud Firestore](https://firebase.google.com/docs/firestore) (Real-time cloud database for persistent progress, streaks, gems, and companion evolutions)
+  * Role-Based Access Control (RBAC) with Owner/Admin controls & Zero-Trust Firestore Security Rules (`firestore.rules`)
 * **Backend & Server**:
 
   * **Node.js + Express**: Full-stack bundled server (`server.ts`) for containers / Cloud Run / Railway / Docker.
@@ -90,6 +101,7 @@ CodeMate-AI/
 │   ├── App.tsx                     # Top-level view router
 │   ├── main.tsx                    # React DOM root entry
 │   └── index.css                   # Global Tailwind CSS styles
+├── firestore.rules                 # Cloud Firestore Zero-Trust security rules
 ├── server.ts                       # Express + Vite production & dev server
 ├── package.json                    # Dependencies & build scripts
 ├── tsconfig.json                   # TypeScript configuration
@@ -104,7 +116,7 @@ CodeMate-AI/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/CodeMate-AI.git
+git clone https://github.com/ankitkgupta11-g/CodeMate-AI.git
 cd CodeMate-AI
 ```
 

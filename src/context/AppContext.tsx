@@ -2,6 +2,23 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserState, Companion, ChatMessage, LearningMode, UserLearningProfile } from '../types';
 import { COMPANIONS } from '../data/companions';
 import { COURSES } from '../data/courses';
+import {
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import {
+  auth,
+  googleProvider,
+  db,
+  isUserOwner,
+  getOwnerDisplayName,
+  testConnection,
+} from '../lib/firebase';
 
 export interface AppContextType {
   state: UserState;
@@ -12,6 +29,7 @@ export interface AppContextType {
   activeCompanion: Companion;
   chatMessages: ChatMessage[];
   isAiTyping: boolean;
+  isAuthLoading: boolean;
   currentLearningMode: LearningMode;
   setChatLearningMode: (mode: LearningMode) => void;
   sendChatMessage: (content: string, overrideMode?: LearningMode) => Promise<void>;
@@ -20,6 +38,9 @@ export interface AppContextType {
   updateLearningProfile: (profile: Partial<UserLearningProfile>) => void;
   addWeakTopic: (topic: string) => void;
   removeWeakTopic: (topic: string) => void;
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  loginWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signupWithEmail: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   login: (email: string, name?: string) => void;
   signup: (name: string, email: string) => void;
   logout: () => void;
@@ -125,6 +146,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeChapterSlug, setActiveChapterSlug] = useState<string>('ai-fundamentals-01');
   const [currentLearningMode, setChatLearningMode] = useState<LearningMode>('learn');
   const [isAiTyping, setIsAiTyping] = useState<boolean>(false);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
     if (state.chatHistory && state.chatHistory.length > 0) {
       if (state.chatHistory.length === 1 && state.chatHistory[0].id === 'welcome-msg') {
@@ -134,6 +156,109 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     return [createWelcomeMessage(state.pet.customName || state.pet.companionName, state.user?.name || 'Learner')];
   });
+
+  // Test connection to Firestore on boot
+  useEffect(() => {
+    testConnection();
+
+    // Listen to Firebase Auth state
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        const userEmail = fbUser.email || '';
+        const rawName = fbUser.displayName || userEmail.split('@')[0] || 'Learner';
+        const userName = isUserOwner(userEmail) ? getOwnerDisplayName(userEmail, rawName) : rawName;
+        const role = isUserOwner(userEmail) ? 'owner' : 'student';
+
+        // Attempt to load user progress from Firestore
+        try {
+          const progressRef = doc(db, 'userProgress', fbUser.uid);
+          const progressSnap = await getDoc(progressRef);
+
+          if (progressSnap.exists()) {
+            const data = progressSnap.data();
+            setState(prev => ({
+              ...prev,
+              isLoggedIn: true,
+              user: {
+                uid: fbUser.uid,
+                email: userEmail,
+                name: userName,
+                avatar: fbUser.photoURL || undefined,
+                role,
+              },
+              streak: typeof data.streak === 'number' ? data.streak : prev.streak,
+              gems: typeof data.gems === 'number' ? data.gems : prev.gems,
+              hearts: typeof data.hearts === 'number' ? data.hearts : prev.hearts,
+              pet: {
+                ...prev.pet,
+                companionName: data.petCompanionName || prev.pet.companionName,
+                customName: data.petCustomName || prev.pet.customName,
+                level: typeof data.petLevel === 'number' ? data.petLevel : prev.pet.level,
+                xp: typeof data.petXp === 'number' ? data.petXp : prev.pet.xp,
+                isEvolved: typeof data.petIsEvolved === 'boolean' ? data.petIsEvolved : prev.pet.isEvolved,
+              },
+              completedChapters: data.completedChapters ? JSON.parse(data.completedChapters) : prev.completedChapters,
+              enrolledCourses: data.enrolledCourses ? JSON.parse(data.enrolledCourses) : prev.enrolledCourses,
+            }));
+          } else {
+            // First time - store initial state in Firestore
+            const initialProgress = {
+              userId: fbUser.uid,
+              streak: state.streak,
+              gems: state.gems,
+              hearts: state.hearts,
+              petCompanionName: state.pet.companionName,
+              petCustomName: state.pet.customName,
+              petLevel: state.pet.level,
+              petXp: state.pet.xp,
+              petIsEvolved: state.pet.isEvolved,
+              completedChapters: JSON.stringify(state.completedChapters),
+              enrolledCourses: JSON.stringify(state.enrolledCourses),
+              updatedAt: new Date().toISOString(),
+            };
+            await setDoc(progressRef, initialProgress);
+
+            const userRef = doc(db, 'users', fbUser.uid);
+            await setDoc(userRef, {
+              userId: fbUser.uid,
+              name: userName,
+              email: userEmail,
+              role,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+
+            setState(prev => ({
+              ...prev,
+              isLoggedIn: true,
+              user: {
+                uid: fbUser.uid,
+                email: userEmail,
+                name: userName,
+                avatar: fbUser.photoURL || undefined,
+                role,
+              },
+            }));
+          }
+        } catch (err) {
+          console.warn('Could not sync firestore on auth change:', err);
+          setState(prev => ({
+            ...prev,
+            isLoggedIn: true,
+            user: {
+              uid: fbUser.uid,
+              email: userEmail,
+              name: userName,
+              avatar: fbUser.photoURL || undefined,
+              role,
+            },
+          }));
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     try {
@@ -349,31 +474,212 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const loginWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
+    setIsAuthLoading(true);
+    try {
+      const res = await signInWithPopup(auth, googleProvider);
+      const fbUser = res.user;
+      const userEmail = (fbUser.email || '').trim().toLowerCase();
+      const rawName = fbUser.displayName || userEmail.split('@')[0] || 'Learner';
+      const userName = isUserOwner(userEmail) ? getOwnerDisplayName(userEmail, rawName) : rawName;
+      const role = isUserOwner(userEmail) ? 'owner' : 'student';
+
+      setState(prev => ({
+        ...prev,
+        isLoggedIn: true,
+        user: {
+          uid: fbUser.uid,
+          email: userEmail,
+          name: userName,
+          avatar: fbUser.photoURL || undefined,
+          role,
+        },
+      }));
+      navigateTo('dashboard', { tab: 'home' });
+      return { success: true };
+    } catch (err: any) {
+      console.error('Google Auth Error:', err);
+      return {
+        success: false,
+        error: err.message || 'Google sign-in failed. Please try again.',
+      };
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const loginWithEmail = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    setIsAuthLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
+    try {
+      let fbUser;
+      try {
+        const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+        fbUser = cred.user;
+      } catch (signInErr: any) {
+        // If owner account hasn't been created in Firebase yet, auto-create it immediately!
+        if (
+          (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') &&
+          isUserOwner(cleanEmail)
+        ) {
+          try {
+            const newCred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+            fbUser = newCred.user;
+            const ownerName = getOwnerDisplayName(cleanEmail);
+            try {
+              await updateProfile(fbUser, { displayName: ownerName });
+            } catch {
+              // ignore
+            }
+          } catch (createErr: any) {
+            // If already created or password wrong, throw original signInErr
+            throw signInErr;
+          }
+        } else {
+          throw signInErr;
+        }
+      }
+
+      const userEmail = (fbUser.email || cleanEmail).trim().toLowerCase();
+      const rawName = fbUser.displayName || userEmail.split('@')[0] || 'Learner';
+      const userName = isUserOwner(userEmail) ? getOwnerDisplayName(userEmail, rawName) : rawName;
+      const role = isUserOwner(userEmail) ? 'owner' : 'student';
+
+      setState(prev => ({
+        ...prev,
+        isLoggedIn: true,
+        user: {
+          uid: fbUser.uid,
+          email: userEmail,
+          name: userName,
+          avatar: fbUser.photoURL || undefined,
+          role,
+        },
+      }));
+      navigateTo('dashboard', { tab: 'home' });
+      return { success: true };
+    } catch (err: any) {
+      console.error('Email sign in error:', err);
+      let msg = 'Failed to sign in. Please verify your credentials.';
+      if (
+        err.code === 'auth/invalid-credential' ||
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/user-not-found'
+      ) {
+        msg = 'Invalid email or password. If you do not have an account yet, switch to "Sign Up" above.';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        msg = 'Email/password sign-in is not enabled in Firebase Console. Please use "Continue with Google" for instant entry!';
+      } else if (err.code === 'auth/too-many-requests') {
+        msg = 'Access temporarily locked due to many failed attempts. Try Google Sign-In.';
+      }
+      return { success: false, error: msg };
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const signupWithEmail = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    setIsAuthLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+      const fbUser = cred.user;
+      const designatedName = isUserOwner(cleanEmail)
+        ? getOwnerDisplayName(cleanEmail, name.trim())
+        : (name.trim() || cleanEmail.split('@')[0] || 'Learner');
+
+      try {
+        await updateProfile(fbUser, { displayName: designatedName });
+      } catch {
+        // ignore
+      }
+
+      const userEmail = (fbUser.email || cleanEmail).trim().toLowerCase();
+      const role = isUserOwner(userEmail) ? 'owner' : 'student';
+
+      try {
+        const userRef = doc(db, 'users', fbUser.uid);
+        await setDoc(userRef, {
+          userId: fbUser.uid,
+          name: designatedName,
+          email: userEmail,
+          role,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.warn('Error saving initial user doc:', e);
+      }
+
+      setState(prev => ({
+        ...prev,
+        isLoggedIn: true,
+        user: {
+          uid: fbUser.uid,
+          email: userEmail,
+          name: designatedName,
+          avatar: fbUser.photoURL || undefined,
+          role,
+        },
+      }));
+      navigateTo('dashboard', { tab: 'home' });
+      return { success: true };
+    } catch (err: any) {
+      console.error('Email sign up error:', err);
+      let msg = 'Failed to create account.';
+      if (err.code === 'auth/email-already-in-use') {
+        msg = 'An account already exists with this email. Please switch to Sign In.';
+      } else if (err.code === 'auth/weak-password') {
+        msg = 'Password is too weak. Please use at least 6 characters.';
+      } else if (err.code === 'auth/invalid-email') {
+        msg = 'Please enter a valid email address.';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        msg = 'Email/password sign-up is not enabled in Firebase Console. Please use "Continue with Google" for instant entry!';
+      }
+      return { success: false, error: msg };
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
   const login = (email: string, name?: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const role = isUserOwner(cleanEmail) ? 'owner' : 'student';
+    const userName = isUserOwner(cleanEmail) ? getOwnerDisplayName(cleanEmail, name) : (name || cleanEmail.split('@')[0] || 'Learner');
     setState(prev => ({
       ...prev,
       isLoggedIn: true,
       user: {
-        name: name || email.split('@')[0] || 'Learner',
-        email,
+        name: userName,
+        email: cleanEmail,
+        role,
       },
     }));
     navigateTo('dashboard', { tab: 'home' });
   };
 
   const signup = (name: string, email: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const role = isUserOwner(cleanEmail) ? 'owner' : 'student';
+    const userName = isUserOwner(cleanEmail) ? getOwnerDisplayName(cleanEmail, name) : (name || 'Learner');
     setState(prev => ({
       ...prev,
       isLoggedIn: true,
       user: {
-        name: name || 'Learner',
-        email,
+        name: userName,
+        email: cleanEmail,
+        role,
       },
     }));
     navigateTo('dashboard', { tab: 'home' });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn('Firebase sign out error:', err);
+    }
     setState(prev => ({
       ...prev,
       isLoggedIn: false,
@@ -557,6 +863,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activeCompanion,
         chatMessages,
         isAiTyping,
+        isAuthLoading,
         currentLearningMode,
         setChatLearningMode,
         sendChatMessage,
@@ -565,6 +872,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateLearningProfile,
         addWeakTopic,
         removeWeakTopic,
+        loginWithGoogle,
+        loginWithEmail,
+        signupWithEmail,
         login,
         signup,
         logout,
