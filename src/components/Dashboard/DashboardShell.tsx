@@ -291,7 +291,7 @@ export const DashboardShell: React.FC = () => {
                       {state.user?.name || 'Learner'}
                     </p>
                     <p className="text-[11px] text-[#5a705d] truncate">
-                      {state.user?.email || 'petlover@example.com'}
+                      {state.user?.email || 'user@codemate.ai'}
                     </p>
                   </div>
                   <button

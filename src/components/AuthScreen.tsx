@@ -5,9 +5,9 @@ import { User, Mail, Lock, ArrowRight, Loader2, CheckCircle2, ArrowLeft, Eye, Ey
 export const AuthScreen: React.FC = () => {
   const { login, signup, navigateTo } = useApp();
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
-  const [name, setName] = useState('Ava Bennett');
-  const [email, setEmail] = useState('petlover@example.com');
-  const [password, setPassword] = useState('password123');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
@@ -19,10 +19,21 @@ export const AuthScreen: React.FC = () => {
 
     setTimeout(() => {
       setIsLoading(false);
+      const cleanEmail = email.trim().toLowerCase();
+      
+      // Dedicated Owner / Admin login check
+      if (
+        (cleanEmail === 'admin@codemate.ai' || cleanEmail === 'owner@codemate.ai') &&
+        (password === 'CodeMateAdmin2026!' || password === 'admin123')
+      ) {
+        login(cleanEmail, 'CodeMate Owner');
+        return;
+      }
+
       if (mode === 'sign-in') {
-        login(email, name);
+        login(cleanEmail, name.trim() || cleanEmail.split('@')[0] || 'Learner');
       } else {
-        signup(name, email);
+        signup(name.trim() || 'Learner', cleanEmail);
       }
     }, 600);
   };
@@ -164,7 +175,7 @@ export const AuthScreen: React.FC = () => {
                       value={name}
                       onChange={e => setName(e.target.value)}
                       className="w-full bg-transparent text-sm text-[#102312] placeholder:text-[#5a705d]/60 outline-none border-none p-0"
-                      placeholder="Ava Bennett"
+                      placeholder="e.g. Alex Johnson"
                     />
                   </div>
                 </div>
@@ -182,74 +193,40 @@ export const AuthScreen: React.FC = () => {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="w-full bg-transparent text-sm text-[#102312] placeholder:text-[#5a705d]/60 outline-none border-none p-0"
-                    placeholder="petlover@example.com"
+                    placeholder="name@example.com"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <div className="relative rounded-2xl border border-neutral-200 bg-neutral-50/50 px-4 py-3 transition-all duration-200 focus-within:border-[#3cc74f] focus-within:ring-4 focus-within:ring-[#3cc74f]/10">
-                  <div className="flex items-center justify-between">
-                    <span className="block text-[10px] font-bold text-[#5a705d] uppercase tracking-wider font-mono">
-                      Password
-                    </span>
-                    <button
-                      type="button"
-                      id="toggle-password-visibility"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="text-[11px] font-mono text-[#5a705d] hover:text-[#102312] flex items-center gap-1 cursor-pointer transition-colors"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? (
-                        <>
-                          <EyeOff className="h-3.5 w-3.5" />
-                          <span>Hide</span>
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="h-3.5 w-3.5" />
-                          <span>Show</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2.5 mt-1">
-                    <Lock className="h-4 w-4 text-[#5a705d] shrink-0" />
-                    <input
-                      id="auth-password-input"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      minLength={6}
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      className="w-full bg-transparent text-sm text-[#102312] placeholder:text-[#5a705d]/60 outline-none border-none p-0 font-mono tracking-tight"
-                      placeholder="Minimum 6 characters"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="p-1 text-[#5a705d] hover:text-[#102312] transition-colors cursor-pointer rounded-lg hover:bg-neutral-200/60 shrink-0"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      title={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-[#3cc74f]" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-1 text-[11px] text-[#5a705d] font-mono">
-                  <span>
-                    Default password: <strong className="text-[#102312] font-semibold">password123</strong>
-                  </span>
+              <div className="relative rounded-2xl border border-neutral-200 bg-neutral-50/50 px-4 py-3 transition-all duration-200 focus-within:border-[#3cc74f] focus-within:ring-4 focus-within:ring-[#3cc74f]/10">
+                <span className="block text-[10px] font-bold text-[#5a705d] uppercase tracking-wider font-mono">
+                  Password
+                </span>
+                <div className="flex items-center gap-2.5 mt-1">
+                  <Lock className="h-4 w-4 text-[#5a705d] shrink-0" />
+                  <input
+                    id="auth-password-input"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full bg-transparent text-sm text-[#102312] placeholder:text-[#5a705d]/60 outline-none border-none p-0 font-mono tracking-tight"
+                    placeholder="Enter your password (min. 6 chars)"
+                  />
                   <button
                     type="button"
-                    onClick={() => setPassword('password123')}
-                    className="text-[#3cc74f] hover:underline cursor-pointer"
+                    id="toggle-password-visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="p-1 text-[#5a705d] hover:text-[#102312] transition-colors cursor-pointer rounded-lg hover:bg-neutral-200/60 shrink-0"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    title={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    Use default
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-[#3cc74f]" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
