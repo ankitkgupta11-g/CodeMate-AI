@@ -29,7 +29,80 @@ export function getOwnerDisplayName(email?: string | null, fallback?: string): s
   if (clean === 'kajugupta1119@gmail.com' || clean === 'ankitkgupta1123@gmail.com') {
     return 'Ankit Gupta';
   }
-  return fallback || 'CodeMate Owner';
+  return fallback || 'Ankit Gupta';
+}
+
+export function mapFirebaseAuthError(error: any): {
+  message: string;
+  isOperationNotAllowed: boolean;
+  isPopupCancelled: boolean;
+} {
+  const code = error?.code || '';
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+    return {
+      message: '',
+      isOperationNotAllowed: false,
+      isPopupCancelled: true,
+    };
+  }
+  if (code === 'auth/operation-not-allowed') {
+    return {
+      message: 'Email/Password sign-in is disabled in your Firebase project. Enable it in Firebase Console > Authentication > Sign-in method, or use "Continue with Google".',
+      isOperationNotAllowed: true,
+      isPopupCancelled: false,
+    };
+  }
+  if (
+    code === 'auth/invalid-credential' ||
+    code === 'auth/wrong-password' ||
+    code === 'auth/user-not-found'
+  ) {
+    return {
+      message: 'Invalid email or password. If you do not have an account yet, switch to "Sign Up" above.',
+      isOperationNotAllowed: false,
+      isPopupCancelled: false,
+    };
+  }
+  if (code === 'auth/email-already-in-use') {
+    return {
+      message: 'An account already exists with this email address. Please switch to "Sign In".',
+      isOperationNotAllowed: false,
+      isPopupCancelled: false,
+    };
+  }
+  if (code === 'auth/network-request-failed') {
+    return {
+      message: 'Network connection issue. Please check your internet and try again.',
+      isOperationNotAllowed: false,
+      isPopupCancelled: false,
+    };
+  }
+  if (code === 'auth/weak-password') {
+    return {
+      message: 'Password is too weak. Please use at least 6 characters.',
+      isOperationNotAllowed: false,
+      isPopupCancelled: false,
+    };
+  }
+  if (code === 'auth/invalid-email') {
+    return {
+      message: 'Please enter a valid email address.',
+      isOperationNotAllowed: false,
+      isPopupCancelled: false,
+    };
+  }
+  if (code === 'auth/too-many-requests') {
+    return {
+      message: 'Access temporarily locked due to multiple failed attempts. Please try again shortly or use Google Sign-In.',
+      isOperationNotAllowed: false,
+      isPopupCancelled: false,
+    };
+  }
+  return {
+    message: error?.message || 'Authentication failed. Please try again.',
+    isOperationNotAllowed: false,
+    isPopupCancelled: false,
+  };
 }
 
 export enum OperationType {

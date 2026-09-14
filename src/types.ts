@@ -125,15 +125,22 @@ export interface UserLearningProfile {
   learningStyle: 'Hands-on' | 'Visual' | 'Step-by-step' | 'Conceptual';
 }
 
+export interface UserProfile {
+  id: string;
+  uid?: string;
+  email: string;
+  name: string;
+  role: 'owner' | 'admin' | 'student';
+  avatar?: string;
+  provider?: 'google' | 'password' | 'instant_owner' | string;
+  joinedDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface UserState {
   isLoggedIn: boolean;
-  user: {
-    uid?: string;
-    name: string;
-    email: string;
-    avatar?: string;
-    role?: 'owner' | 'admin' | 'student';
-  } | null;
+  user: UserProfile | null;
   pet: {
     companionName: string;
     customName: string;

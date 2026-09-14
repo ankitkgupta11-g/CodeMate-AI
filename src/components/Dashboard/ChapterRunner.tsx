@@ -85,6 +85,11 @@ export const ChapterRunner: React.FC = () => {
       return;
     }
 
+    if (!state.hasSubscription && state.hearts <= 0) {
+      setOutOfHeartsModal(true);
+      return;
+    }
+
     let correct = false;
 
     if (currentBlock.type === 'true-false') {
@@ -113,7 +118,7 @@ export const ChapterRunner: React.FC = () => {
     } else {
       setPetReaction('oops');
       const hadHeart = consumeHeart();
-      if (!hadHeart && state.hearts <= 0) {
+      if (!state.hasSubscription && (!hadHeart || state.hearts <= 1)) {
         setOutOfHeartsModal(true);
       }
     }
@@ -216,28 +221,49 @@ export const ChapterRunner: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <button
-                  disabled={hasSubmitted}
-                  onClick={() => setSelectedBool(true)}
-                  className={`py-4 px-6 rounded-2xl font-heading font-bold text-base border-2 transition-all cursor-pointer ${
-                    selectedBool === true
-                      ? 'border-[#3cc74f] bg-[#3cc74f]/10 text-[#25a53a] shadow-sm'
-                      : 'border-neutral-200 bg-white hover:bg-neutral-50 text-[#102312]'
-                  }`}
-                >
-                  True
-                </button>
-                <button
-                  disabled={hasSubmitted}
-                  onClick={() => setSelectedBool(false)}
-                  className={`py-4 px-6 rounded-2xl font-heading font-bold text-base border-2 transition-all cursor-pointer ${
-                    selectedBool === false
-                      ? 'border-[#3cc74f] bg-[#3cc74f]/10 text-[#25a53a] shadow-sm'
-                      : 'border-neutral-200 bg-white hover:bg-neutral-50 text-[#102312]'
-                  }`}
-                >
-                  False
-                </button>
+                {(() => {
+                  let trueStyle = 'border-neutral-200 bg-white hover:bg-neutral-50 text-[#102312]';
+                  let falseStyle = 'border-neutral-200 bg-white hover:bg-neutral-50 text-[#102312]';
+
+                  if (hasSubmitted) {
+                    if (currentBlock.correctAnswer === true) {
+                      trueStyle = 'border-emerald-500 bg-emerald-50 text-emerald-800 font-semibold';
+                      if (selectedBool === false) {
+                        falseStyle = 'border-red-400 bg-red-50 text-red-700';
+                      }
+                    } else {
+                      falseStyle = 'border-emerald-500 bg-emerald-50 text-emerald-800 font-semibold';
+                      if (selectedBool === true) {
+                        trueStyle = 'border-red-400 bg-red-50 text-red-700';
+                      }
+                    }
+                  } else {
+                    if (selectedBool === true) {
+                      trueStyle = 'border-[#3cc74f] bg-[#3cc74f]/10 text-[#25a53a] shadow-sm';
+                    } else if (selectedBool === false) {
+                      falseStyle = 'border-[#3cc74f] bg-[#3cc74f]/10 text-[#25a53a] shadow-sm';
+                    }
+                  }
+
+                  return (
+                    <>
+                      <button
+                        disabled={hasSubmitted}
+                        onClick={() => setSelectedBool(true)}
+                        className={`py-4 px-6 rounded-2xl font-heading font-bold text-base border-2 transition-all cursor-pointer ${trueStyle}`}
+                      >
+                        True
+                      </button>
+                      <button
+                        disabled={hasSubmitted}
+                        onClick={() => setSelectedBool(false)}
+                        className={`py-4 px-6 rounded-2xl font-heading font-bold text-base border-2 transition-all cursor-pointer ${falseStyle}`}
+                      >
+                        False
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -294,23 +320,34 @@ export const ChapterRunner: React.FC = () => {
 
               {currentBlock.options && currentBlock.options.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {currentBlock.options.map(opt => (
-                    <button
-                      key={opt.id}
-                      disabled={hasSubmitted}
-                      onClick={() => {
-                        setFillAnswer(opt.text);
-                        setSelectedChoiceId(opt.id);
-                      }}
-                      className={`p-3.5 rounded-2xl font-medium text-sm border-2 text-center transition-all cursor-pointer ${
-                        fillAnswer === opt.text
-                          ? 'border-[#3cc74f] bg-[#3cc74f]/10 text-[#25a53a] font-bold'
-                          : 'border-neutral-200 bg-white hover:bg-neutral-50 text-[#102312]'
-                      }`}
-                    >
-                      {opt.text}
-                    </button>
-                  ))}
+                  {currentBlock.options.map(opt => {
+                    const isSelected = fillAnswer === opt.text;
+                    let style = 'border-neutral-200 bg-white hover:bg-neutral-50 text-[#102312]';
+
+                    if (hasSubmitted) {
+                      if (opt.isCorrect) {
+                        style = 'border-emerald-500 bg-emerald-50 text-emerald-800 font-semibold';
+                      } else if (isSelected && !opt.isCorrect) {
+                        style = 'border-red-400 bg-red-50 text-red-700 font-semibold';
+                      }
+                    } else if (isSelected) {
+                      style = 'border-[#3cc74f] bg-[#3cc74f]/10 text-[#25a53a] font-bold';
+                    }
+
+                    return (
+                      <button
+                        key={opt.id}
+                        disabled={hasSubmitted}
+                        onClick={() => {
+                          setFillAnswer(opt.text);
+                          setSelectedChoiceId(opt.id);
+                        }}
+                        className={`p-3.5 rounded-2xl font-medium text-sm border-2 text-center transition-all cursor-pointer ${style}`}
+                      >
+                        {opt.text}
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <div>

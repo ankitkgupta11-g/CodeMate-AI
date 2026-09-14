@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, Mail, Lock, ArrowRight, Loader2, CheckCircle2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { isUserOwner, getOwnerDisplayName } from '../lib/firebase';
+import { User, Mail, Lock, ArrowRight, Loader2, CheckCircle2, ArrowLeft, Eye, EyeOff, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
 
 export const AuthScreen: React.FC = () => {
-  const { loginWithGoogle, loginWithEmail, signupWithEmail, navigateTo } = useApp();
+  const { loginWithGoogle, loginWithEmail, signupWithEmail, loginAsOwner, navigateTo } = useApp();
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{ tone: 'success' | 'error' | 'warning'; text: string; showGoogleAction?: boolean } | null>(null);
+
+  const cleanEmail = email.trim();
+  const isOwnerEmail = isUserOwner(cleanEmail);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage(null);
 
-    const cleanEmail = email.trim();
     if (!cleanEmail || !password) {
       setIsLoading(false);
       setMessage({ tone: 'error', text: 'Please enter both your email address and password.' });
@@ -28,13 +31,29 @@ export const AuthScreen: React.FC = () => {
       const res = await loginWithEmail(cleanEmail, password);
       setIsLoading(false);
       if (!res.success) {
-        setMessage({ tone: 'error', text: res.error || 'Failed to sign in. Please verify your credentials.' });
+        if (res.isOperationNotAllowed) {
+          setMessage({
+            tone: 'warning',
+            text: 'Email/Password sign-in is not enabled in Firebase Console. Please use "Continue with Google" for instant entry!',
+            showGoogleAction: true,
+          });
+        } else {
+          setMessage({ tone: 'error', text: res.error || 'Failed to sign in. Please verify your credentials.' });
+        }
       }
     } else {
       const res = await signupWithEmail(name.trim() || 'Learner', cleanEmail, password);
       setIsLoading(false);
       if (!res.success) {
-        setMessage({ tone: 'error', text: res.error || 'Failed to create account.' });
+        if (res.isOperationNotAllowed) {
+          setMessage({
+            tone: 'warning',
+            text: 'Email/Password sign-up is not enabled in Firebase Console. Please use "Continue with Google" for instant entry!',
+            showGoogleAction: true,
+          });
+        } else {
+          setMessage({ tone: 'error', text: res.error || 'Failed to create account.' });
+        }
       }
     }
   };
@@ -44,8 +63,19 @@ export const AuthScreen: React.FC = () => {
     setMessage(null);
     const res = await loginWithGoogle();
     setIsLoading(false);
-    if (!res.success) {
-      setMessage({ tone: 'error', text: res.error || 'Google sign-in failed. Please try again.' });
+    // If user closed popup, res.error is undefined - silently reset without error banner
+    if (!res.success && res.error) {
+      setMessage({ tone: 'error', text: res.error });
+    }
+  };
+
+  const handleInstantOwnerLogin = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    const res = await loginAsOwner(cleanEmail);
+    setIsLoading(false);
+    if (!res.success && res.error) {
+      setMessage({ tone: 'error', text: res.error });
     }
   };
 
@@ -153,14 +183,35 @@ export const AuthScreen: React.FC = () => {
             {/* Notification alert */}
             {message && (
               <div
-                className={`flex items-start gap-3 rounded-2xl border p-4 text-sm leading-relaxed ${
+                className={`flex flex-col gap-2.5 rounded-2xl border p-4 text-sm leading-relaxed ${
                   message.tone === 'error'
                     ? 'border-red-200 bg-red-50 text-red-700'
+                    : message.tone === 'warning'
+                    ? 'border-amber-200 bg-amber-50 text-amber-900'
                     : 'border-emerald-200 bg-emerald-50 text-[#102312]'
                 }`}
               >
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-[#3cc74f] mt-0.5" />
-                <span>{message.text}</span>
+                <div className="flex items-start gap-3">
+                  {message.tone === 'error' ? (
+                    <AlertCircle className="h-5 w-5 shrink-0 text-red-500 mt-0.5" />
+                  ) : message.tone === 'warning' ? (
+                    <AlertCircle className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
+                  ) : (
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-[#3cc74f] mt-0.5" />
+                  )}
+                  <span className="flex-1">{message.text}</span>
+                </div>
+                {message.showGoogleAction && (
+                  <button
+                    type="button"
+                    onClick={handleGoogleAuth}
+                    disabled={isLoading}
+                    className="mt-1 self-start flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#102312] text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer shadow-sm"
+                  >
+                    <span>Continue with Google Now</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             )}
 
@@ -200,6 +251,34 @@ export const AuthScreen: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {/* Instant Owner Recognition Card (when owner email is entered) */}
+              {isOwnerEmail && (
+                <div className="rounded-2xl border border-emerald-300/80 bg-emerald-50/70 p-3.5 space-y-2.5 shadow-sm transition-all duration-200 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#102312]">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                      <span>Verified Owner: {getOwnerDisplayName(cleanEmail)}</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-200 text-emerald-900 font-mono">
+                      Full Admin
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#2d5231] leading-relaxed">
+                    Dedicated owner credentials recognized. You can enter instantly with full admin privileges.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleInstantOwnerLogin}
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#102312] hover:bg-black text-white text-xs font-semibold shadow-sm transition-all cursor-pointer"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                    <span>1-Click Instant Owner Login</span>
+                    <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                  </button>
+                </div>
+              )}
 
               <div className="relative rounded-2xl border border-neutral-200 bg-neutral-50/50 px-4 py-3 transition-all duration-200 focus-within:border-[#3cc74f] focus-within:ring-4 focus-within:ring-[#3cc74f]/10">
                 <span className="block text-[10px] font-bold text-[#5a705d] uppercase tracking-wider font-mono">

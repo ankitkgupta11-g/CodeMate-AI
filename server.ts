@@ -12,6 +12,11 @@ const PORT = 3000;
 
 app.use(express.json());
 
+// API Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', service: 'CodeMate AI Server', time: new Date().toISOString() });
+});
+
 // Lazy-initialized Gemini client
 let geminiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
@@ -129,11 +134,11 @@ app.post('/api/chat', async (req, res) => {
     }));
 
     let replyText = '';
-    let usedModel = 'gemini-2.5-flash';
+    let usedModel = 'gemini-3.8-flash';
 
     try {
       const response = await client.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.8-flash',
         contents: contents,
         config: {
           systemInstruction: systemInstruction,
@@ -142,9 +147,9 @@ app.post('/api/chat', async (req, res) => {
       });
       replyText = response.text || '';
     } catch (primaryError: any) {
-      console.warn('Primary model gemini-2.5-flash failed, attempting fallback to gemini-3.8-flash:', primaryError?.message);
+      console.warn('Primary model gemini-3.8-flash failed, attempting fallback to gemini-3.1-pro-preview:', primaryError?.message);
       const fallbackModelResp = await client.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: 'gemini-3.1-pro-preview',
         contents: contents,
         config: {
           systemInstruction: systemInstruction,
@@ -152,7 +157,7 @@ app.post('/api/chat', async (req, res) => {
         },
       });
       replyText = fallbackModelResp.text || '';
-      usedModel = 'gemini-3.8-flash';
+      usedModel = 'gemini-3.1-pro-preview';
     }
 
     if (!replyText) {
